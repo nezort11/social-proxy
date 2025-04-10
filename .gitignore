@@ -1,0 +1,16 @@
+node_modules*
+build
+*.zip
+.env
+
+tsconfig.tsbuildinfo
+package-lock.json
+
+# Terraform
+.terraform
+*.tfstate*
+
+.DS_Store
+
+/env/*.json
+**/*.env

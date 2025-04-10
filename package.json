@@ -1,0 +1,78 @@
+{
+  "name": "social-translator-bot",
+  "license": "MIT",
+  "version": "1.0.0",
+  "volta": {
+    "node": "18.20.5"
+  },
+  "main": "./src/index.ts",
+  "scripts": {
+    "git:push": "git push origin main:main && git push template main:main",
+    "command:js": "node",
+    "command:ts": "pnpm tsx",
+    "run:js": "pnpm command:js ./build/index.js",
+    "run:ts": "pnpm command:ts .",
+    "run:deamon": "pnpm nodemon --exec \"pnpm command:ts\" --watch \"./.env\" --watch \"./src\" .",
+    "dev": "APP_ENV=local NODE_ENV=development pnpm run:deamon",
+    "dev:prod": "APP_ENV=local NODE_ENV=production pnpm run:deamon",
+    "start": "NODE_ENV=production pnpm run:js",
+    "start:dev": "NODE_ENV=development pnpm run:js",
+    "build": "pnpm tsc --build",
+    "npm:install": "npm install --omit=dev --force",
+    "npm:pre": "mv ./node_modules ./node_modules_dev && mv ./node_modules_prod ./node_modules 2>/dev/null ; mkdir -p node_modules",
+    "npm:post": "mv ./node_modules ./node_modules_prod && mv ./node_modules_dev ./node_modules",
+    "npm:reinstall": "pnpm npm:pre && pnpm npm:install && pnpm npm:post",
+    "app:package": "zip -r ./social-translator-bot.zip ./package.json ./node_modules ./build ./env",
+    "app:upload": "yc storage s3api put-object --bucket $(terraform output -raw lpman_bot_code_bucket) --key function.zip --body ./social-translator-bot.zip",
+    "app:ci": "pnpm build && pnpm npm:pre && pnpm app:package && pnpm npm:post",
+    "tf": "source ./env/.env && terraform",
+    "app:cd": "pnpm app:ci && pnpm tf apply -auto-approve",
+    "env:pre": "source ./env/.env",
+    "webhook:info": "source ./env/.env && pnpm telegraf -m getWebhookInfo -t $BOT_TOKEN",
+    "webhook:set": "pnpm env:pre && pnpm telegraf -m setWebhook -t $BOT_TOKEN -D \"{ \\\"url\\\": \\\"https://$(terraform output -raw lpman_bot_gateway_domain)/webhook\\\", \\\"drop_pending_updates\\\": \\\"True\\\" }\"",
+    "webhook:delete": "pnpm env:pre && pnpm telegraf -m deleteWebhook -t $BOT_TOKEN"
+  },
+  "comments": {
+    "serverless:deploy": "pnpm serverless deploy --stage=prod",
+    "serverless:info": "pnpm serverless info --stage=prod",
+    "serverless:purge": "pnpm serverless remove",
+    "webhook:info": "./scripts/get-webhookinfo.sh",
+    "webhook:set": "./scripts/set-webhook.sh",
+    "webhook:delete": "./scripts/delete-webhook.sh",
+    "bot:deploy": "pnpm build && pnpm serverless:deploy && pnpm webhook:set",
+    "bot:purge": "pnpm serverless:purge && pnpm webhook:delete"
+  },
+  "dependencies": {
+    "@types/express": "^5.0.1",
+    "@types/node": "^22.9.0",
+    "apify-client": "^2.12.0",
+    "axios": "^1.8.4",
+    "dotenv": "16.4.4",
+    "express": "^5.1.0",
+    "lodash": "^4.17.21",
+    "serverless-http": "3.2.0",
+    "telegraf": "4.16.3",
+    "telegraf-session-store-ydb": "^1.0.4",
+    "ydb-sdk": "^5.9.1",
+    "p-timeout": "^6.1.4"
+  },
+  "dependenciesComments": {
+    "@apollo/client": "^3.13.1",
+    "@sparticuz/chromium": "^132.0.0",
+    "puppeteer-core": "^24.3.0",
+    "@pancakeswap/v3-sdk": "^3.8.13",
+    "@pancakeswap/chains": "^0.4.6",
+    "@pancakeswap/sdk": "^5.8.10",
+    "bignumber.js": "^9.1.2",
+    "viem": "^2.23.5",
+    "wagmi": "^2.14.12",
+    "lodash": "^4.17.21",
+    "graphql": "^16.10.0"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.17.16",
+    "nodemon": "2.0.20",
+    "tsx": "^4.19.2",
+    "typescript": "5.6.3"
+  }
+}

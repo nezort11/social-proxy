@@ -23,7 +23,7 @@ resource "yandex_function" "social-ingest-function" {
   service_account_id = var.service_account_id
 
   memory = 2048
-  execution_timeout = 60
+  execution_timeout = 120
   concurrency = 3
 
   content {

@@ -79,6 +79,6 @@ resource "yandex_function_trigger" "social-publish-function-trigger" {
   }
 
   timer {
-    cron_expression = "*/17 * ? * * *"
+    cron_expression = "*/16 * ? * * *"
   }
 }

@@ -17,7 +17,7 @@ import {
 
 const app = express();
 
-const ORIGINAL_UTC_OFFSET = -6;
+const ORIGINAL_UTC_OFFSET = -4; // Boston
 const TARGET_UTC_OFFSET = 3;
 const ORIGINAL_TARGET_UTC_DIFF = Math.abs(
   TARGET_UTC_OFFSET - ORIGINAL_UTC_OFFSET
@@ -63,7 +63,7 @@ const translateTweet = async (tweetText: string) => {
       messages: [
         {
           role: "user",
-          content: `Please translate the following Twitter post into Russian (for context: twitter profile is about radical Christianity). Your response MUST contain only the translated output.\n\n---\n${tweetText}`,
+          content: `Please translate the following Twitter post into Russian (for context: twitter profile is about radical Christianity). Remember to capitalize pronouns referring to God. Your response MUST contain only the translated output.\n\n---\n${tweetText}`,
         },
       ],
       max_tokens: 500, // Adjust this if necessary

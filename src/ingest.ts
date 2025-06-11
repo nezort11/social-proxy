@@ -25,8 +25,14 @@ const ingestLatestTweets = async () => {
   console.log(`Successfully saved ${tweets.length} ingested tweets`);
 };
 
-app.use(async () => {
-  await ingestLatestTweets();
+app.use(async (req, res) => {
+  try {
+    await ingestLatestTweets();
+    res.status(200).send("Ingestion completed");
+  } catch (err) {
+    console.error("Ingestion failed:", err);
+    res.status(500).send("Ingestion failed");
+  }
 });
 
 export const handler = http(app);

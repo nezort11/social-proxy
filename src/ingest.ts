@@ -10,9 +10,9 @@ import { tweetsStore } from "./db";
 
 const app = express();
 
-const ingestLatestTweets = async () => {
-  console.log("Ingesting latest tweets...");
-  const tweets = await getLatestTweets();
+const ingestLatestTweets = async (author: string) => {
+  console.log(`Ingesting latest @${author} tweets...`);
+  const tweets = await getLatestTweets(author);
 
   for (const tweet of tweets) {
     console.log(`Saving tweet ${tweet.id} into database...`);
@@ -22,12 +22,17 @@ const ingestLatestTweets = async () => {
     await tweetsStore.set(tweet.id, tweet);
   }
 
-  console.log(`Successfully saved ${tweets.length} ingested tweets`);
+  console.log(
+    `Successfully saved ${tweets.length} ingested @${author} tweets`
+  );
 };
 
 app.use(async (req, res) => {
   try {
-    await ingestLatestTweets();
+    await ingestLatestTweets("oliverburdick");
+    await ingestLatestTweets("JohnPiper");
+    await ingestLatestTweets("desiringGod");
+    await ingestLatestTweets("timkellernyc");
     res.status(200).send("Ingestion completed");
   } catch (err) {
     console.error("Ingestion failed:", err);
@@ -38,7 +43,7 @@ app.use(async (req, res) => {
 export const handler = http(app);
 
 const main = async () => {
-  await ingestLatestTweets();
+  await ingestLatestTweets("oliverburdick");
   process.exit(0);
 };
 if (require.main === module) {

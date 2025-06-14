@@ -165,7 +165,7 @@ const callActorUi = async (actorId: string, input: unknown) => {
 // https://apify.com/kaitoeasyapi/twitter-x-data-tweet-scraper-pay-per-result-cheapest
 const ACTOR_ID = "CJdippxWmn9uRfooo";
 
-export const getLatestTweets = async () => {
+export const getLatestTweets = async (author: string) => {
   console.log("Requesting run to fetch latest tweets...");
   const run = await callActorUi(ACTOR_ID, {
     "filter:blue_verified": false,
@@ -188,7 +188,7 @@ export const getLatestTweets = async () => {
     "filter:verified": false,
     "filter:videos": false,
     "filter:vine": false,
-    from: "oliverburdick",
+    from: author,
     "include:nativeretweets": false,
     lang: "en",
     maxItems: 3, // does not work, always 20
@@ -200,7 +200,6 @@ export const getLatestTweets = async () => {
     "-min_faves": 0,
     "-min_replies": 0,
   });
-  console.log();
 
   console.log("Waiting until tweets fetch run completes...");
   // wait until run completes

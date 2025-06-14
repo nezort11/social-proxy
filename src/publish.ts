@@ -3,6 +3,7 @@
  */
 import http from "serverless-http";
 import express from "express";
+import { Chat } from "telegraf/typings/core/types/typegram";
 import { driver, postedStore } from "./db";
 import { Session } from "ydb-sdk";
 import { Tweet } from "./tweets";
@@ -17,26 +18,37 @@ import {
 
 const app = express();
 
-const ORIGINAL_UTC_OFFSET = -4; // Boston
 const TARGET_UTC_OFFSET = 3;
-const ORIGINAL_TARGET_UTC_DIFF = Math.abs(
-  TARGET_UTC_OFFSET - ORIGINAL_UTC_OFFSET
-);
-const ONE_DAY_PASSED_UTC_HOURS = 24 - ORIGINAL_TARGET_UTC_DIFF;
 
-const getOldestTweets = async () => {
+const getOneDayPassedUtcHours = (originalUtcOffset: number) => {
+  const originalTargetUtcDiff = Math.abs(
+    TARGET_UTC_OFFSET - originalUtcOffset
+  );
+  return 24 - originalTargetUtcDiff;
+};
+
+const getOldestTweets = async (
+  author: string,
+  authorUtcOffset: number
+) => {
   await driver.ready(15000);
+
+  const authorOneDayPassedUtcHours =
+    getOneDayPassedUtcHours(authorUtcOffset);
 
   const oldestTweets: Tweet[] = [];
   await driver.tableClient.withSession(async (session: Session) => {
+    const TWEET_CREATED_AT_TIMESTAMP =
+      'CAST(JSON_VALUE(tweets.data, "$.createdAt") AS Timestamp)';
     const query = `
       SELECT
           tweets.data
       FROM tweets
       LEFT JOIN posted ON JSON_VALUE(tweets.data, "$.id") = posted.id
       WHERE posted.id IS NULL
-        AND CAST(JSON_VALUE(tweets.data, "$.createdAt") AS Timestamp) <= CurrentUtcTimestamp() - Interval("PT${ONE_DAY_PASSED_UTC_HOURS}H")
-      ORDER BY CAST(JSON_VALUE(tweets.data, "$.createdAt") AS Timestamp)
+        AND ${TWEET_CREATED_AT_TIMESTAMP} <= CurrentUtcTimestamp() - Interval("PT${authorOneDayPassedUtcHours}H")
+        AND JSON_VALUE(tweets.data, "$.author.userName") = "${author}"
+      ORDER BY ${TWEET_CREATED_AT_TIMESTAMP}
       LIMIT 1;
     `;
 
@@ -51,7 +63,7 @@ const getOldestTweets = async () => {
     }
   });
 
-  console.log(`Queried ${oldestTweets.length} oldest tweets`);
+  console.log(`Queried ${oldestTweets.length} oldest @${author} tweets`);
   return oldestTweets;
 };
 
@@ -84,8 +96,20 @@ const translateTweet = async (tweetText: string) => {
   return translatedTweetMessageText.trim();
 };
 
-const publishOldestTweets = async () => {
-  const tweets = await getOldestTweets();
+const publishOldestTweets = async (
+  author: string,
+  authorUtcOffset: number,
+  channelChatId: string
+) => {
+  const tweets = await getOldestTweets(author, authorUtcOffset);
+
+  const publishChannelChat = (await bot.telegram.getChat(
+    channelChatId
+  )) as Chat.ChannelGetChat;
+  // const isPrivateChannel = !!publishChannelChat.active_usernames?.length;
+  const isPrivateChannel = true;
+  // invite link should always be present in private/public channel
+  const publishChannelInviteLink = publishChannelChat.invite_link!;
 
   for (const tweet of tweets) {
     const TCO_LINK_REGEX = /https:\/\/t\.co\/[a-zA-Z0-9]+/g;
@@ -93,6 +117,11 @@ const publishOldestTweets = async () => {
 
     const resultTweet = tweet.text.replace(TCO_LINK_REGEX, "");
     const translatedTweet = await translateTweet(resultTweet);
+
+    // if private channel include invite link to channel
+    const publishMessageHtml = isPrivateChannel
+      ? `${translatedTweet}\n\n<a href="${publishChannelInviteLink}">@️ ${publishChannelChat.title}</a>`
+      : translatedTweet;
     if (
       tcoLinks &&
       "media" in tweet.extendedEntities &&
@@ -101,17 +130,20 @@ const publishOldestTweets = async () => {
       const tweetMedia = tweet.extendedEntities.media[0];
 
       await bot.telegram.sendPhoto(
-        PUBLISH_CHANNEL_CHAT_ID,
+        channelChatId,
         tweetMedia.media_url_https,
         {
-          caption: translatedTweet,
+          caption: publishMessageHtml,
+          parse_mode: "HTML",
         }
       );
     } else {
-      await bot.telegram.sendMessage(
-        PUBLISH_CHANNEL_CHAT_ID,
-        translatedTweet
-      );
+      await bot.telegram.sendMessage(channelChatId, publishMessageHtml, {
+        parse_mode: "HTML",
+        link_preview_options: {
+          is_disabled: true,
+        },
+      });
     }
 
     await postedStore.set(tweet.id, {
@@ -121,14 +153,34 @@ const publishOldestTweets = async () => {
 };
 
 app.use(async (req, res) => {
-  await publishOldestTweets();
+  await publishOldestTweets(
+    "oliverburdick",
+    -4, // Boston (EDT)
+    PUBLISH_CHANNEL_CHAT_ID
+  );
+  const desiringGodChannelChatId = getChatId("2502755801");
+  await publishOldestTweets(
+    "JohnPiper",
+    -5, // Minneapolis (CDT)
+    desiringGodChannelChatId
+  );
+  await publishOldestTweets(
+    "desiringGod",
+    -5, // Minneapolis (CDT)
+    desiringGodChannelChatId
+  );
+  await publishOldestTweets(
+    "timkellernyc",
+    -4, // NY (EDT)
+    getChatId("2414668710")
+  );
   res.end();
 });
 
 export const handler = http(app);
 
 const main = async () => {
-  await publishOldestTweets();
+  await publishOldestTweets("oliverburdick", -4, PUBLISH_CHANNEL_CHAT_ID);
   process.exit(0);
 };
 if (require.main === module) {

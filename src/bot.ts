@@ -3,7 +3,7 @@ import { type Context, Telegraf, session, Markup } from "telegraf";
 import { APP_ENV, BOT_TOKEN } from "./env";
 import { sessionStore } from "./db";
 import { BotContext, BotSession } from "./types";
-import { SceneId, stage } from "./scenes";
+// import { SceneId, stage } from "./scenes";
 import { delay, importPTimeout } from "./utils";
 
 const ERROR_FORBIDDEN_BOT_WAS_BLOCKED_BY_THE_USER =
@@ -72,7 +72,7 @@ bot.use(
   session({ store: sessionStore, defaultSession: (): BotSession => ({}) })
 );
 
-bot.use(stage.middleware());
+// bot.use(stage.middleware());
 
 bot.use(async (context, next) => {
   await context.persistentChatAction("typing", async () => {

@@ -16,6 +16,10 @@ declare global {
       OPENAI_API_KEY: string;
 
       PUBLISH_CHANNEL_ID: string;
+
+      API_ID: string;
+      APP_HASH: string;
+      SESSION: string;
     }
   }
 }

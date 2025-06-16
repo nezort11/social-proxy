@@ -10,11 +10,8 @@ import { Tweet } from "./tweets";
 import { bot } from "./bot";
 import { getChatId } from "./utils";
 import axios from "axios";
-import {
-  OPENAI_API_BASE_URL,
-  OPENAI_API_KEY,
-  PUBLISH_CHANNEL_CHAT_ID,
-} from "./env";
+import { GptResponseData, openaiClient } from "./openai";
+import { PUBLISH_CHANNEL_CHAT_ID } from "./env";
 
 const app = express();
 
@@ -68,7 +65,7 @@ const getOldestTweets = async (
 };
 
 const translateTweet = async (tweetText: string) => {
-  const response = await axios.post(
+  const response = await openaiClient.post<GptResponseData>(
     "/v1/chat/completions",
     {
       model: "gpt-4o",
@@ -79,13 +76,6 @@ const translateTweet = async (tweetText: string) => {
         },
       ],
       max_tokens: 500, // Adjust this if necessary
-    },
-    {
-      baseURL: OPENAI_API_BASE_URL,
-      headers: {
-        Authorization: `Bearer ${OPENAI_API_KEY}`,
-        "Content-Type": "application/json",
-      },
     }
   );
   const translatedTweetData = response.data;

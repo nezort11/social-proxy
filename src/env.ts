@@ -22,3 +22,7 @@ export const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
 export const PUBLISH_CHANNEL_ID = process.env.PUBLISH_CHANNEL_ID;
 export const PUBLISH_CHANNEL_CHAT_ID = getChatId(PUBLISH_CHANNEL_ID);
+
+export const API_ID = process.env.APP_ID!;
+export const APP_HASH = process.env.APP_HASH!;
+export const SESSION = process.env.SESSION;

@@ -55,6 +55,22 @@ resource "yandex_function" "social-publish-function" {
 #   }
 }
 
+resource "yandex_function" "social-forward-function" {
+  name       = "social-forward-function"
+  user_hash  = filebase64sha256("social-translator-bot.zip")
+  runtime    = "nodejs18"
+  entrypoint = "build/forward.handler"
+  service_account_id = var.service_account_id
+
+  memory = 2048
+  execution_timeout = 120
+  concurrency = 3
+
+  content {
+    zip_filename = "social-translator-bot.zip"
+  }
+}
+
 resource "yandex_function_trigger" "social-ingest-function-trigger" {
   name        = "social-ingest-function-trigger"
   description = "Triggers the ingest function daily at 06:00 UTC+3"
@@ -80,5 +96,19 @@ resource "yandex_function_trigger" "social-publish-function-trigger" {
 
   timer {
     cron_expression = "*/16 * ? * * *"
+  }
+}
+
+resource "yandex_function_trigger" "social-forward-function-trigger" {
+  name        = "social-forward-function-trigger"
+  description = "Triggers the forward function every 5 minutes"
+
+  function {
+    id = yandex_function.social-forward-function.id
+    service_account_id = var.service_account_id
+  }
+
+  timer {
+    cron_expression = "*/5 * ? * * *"
   }
 }

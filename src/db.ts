@@ -61,3 +61,14 @@ export const postedStore = Ydb<Posted>({
     sessionColumnName: "data",
   },
 });
+
+export const chatsStore = Ydb<Posted>({
+  driver,
+  driverOptions: { enableReadyCheck: true },
+  tableOptions: {
+    shouldCreateTable: true,
+    tableName: "chats",
+    keyColumnName: "id",
+    sessionColumnName: "data",
+  },
+});

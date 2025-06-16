@@ -26,7 +26,8 @@
     "app:upload": "yc storage s3api put-object --bucket $(terraform output -raw lpman_bot_code_bucket) --key function.zip --body ./social-translator-bot.zip",
     "app:ci": "pnpm build && pnpm npm:pre && pnpm app:package && pnpm npm:post",
     "tf": "source ./env/.env && terraform",
-    "app:cd": "pnpm app:ci && pnpm tf apply -auto-approve",
+    "app:cd": "pnpm tf apply -auto-approve",
+    "app:cicd": "pnpm app:ci && pnpm app:cd",
     "env:pre": "source ./env/.env",
     "webhook:info": "source ./env/.env && pnpm telegraf -m getWebhookInfo -t $BOT_TOKEN",
     "webhook:set": "pnpm env:pre && pnpm telegraf -m setWebhook -t $BOT_TOKEN -D \"{ \\\"url\\\": \\\"https://$(terraform output -raw lpman_bot_gateway_domain)/webhook\\\", \\\"drop_pending_updates\\\": \\\"True\\\" }\"",
@@ -50,11 +51,12 @@
     "dotenv": "16.4.4",
     "express": "^5.1.0",
     "lodash": "^4.17.21",
+    "p-timeout": "^6.1.4",
     "serverless-http": "3.2.0",
     "telegraf": "4.16.3",
     "telegraf-session-store-ydb": "^1.0.4",
-    "ydb-sdk": "^5.9.1",
-    "p-timeout": "^6.1.4"
+    "telegram": "^2.26.22",
+    "ydb-sdk": "^5.9.1"
   },
   "dependenciesComments": {
     "@apollo/client": "^3.13.1",

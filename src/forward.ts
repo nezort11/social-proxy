@@ -8,6 +8,7 @@ import { Api } from "telegram";
 import { getClient } from "./telegram";
 import { GptResponseData, openaiClient } from "./openai";
 import { getChatId } from "./utils";
+import { chatsStore } from "./db";
 
 const app = express();
 
@@ -29,10 +30,16 @@ function shiftEntities(
   return entities;
 }
 
+const POSITION_PROMPT = `
+Hi, please determine whether the following post contains any information about job position/vacancy for Frontend/Full-Stack/Backend in JavaScript/TypeScript/React.
+
+If false you MUST ONLY reply "0" otherwise "1".
+`;
+
 const TARGET_CHANNEL_CHAT_ID = getChatId("2703233078");
 
 const forwardFiltered = async (chat: string) => {
-  console.log("Starting forwarding...");
+  console.log(`Starting forwarding for @${chat}...`);
   const client = await getClient();
   const channel = (await client.getEntity(`@${chat}`)) as Api.Channel;
   const channelFullInfo = await client.invoke(
@@ -45,16 +52,27 @@ const forwardFiltered = async (chat: string) => {
     TARGET_CHANNEL_CHAT_ID
   )) as Api.Channel;
 
+  let chatData = await chatsStore.get(chat);
+  chatData ??= { lastMessageId: null };
+  console.log(`Last message id is #${chatData.lastMessageId}`);
+
   console.log("Getting latest messages...");
-  const messages = await client.getMessages(channel, {
-    // minId: lastMessageId, // 🔥 Only messages with id > minId
-    // offsetId: lastId,
+  let messages = await client.getMessages(channel, {
+    ...(chatData.lastMessageId ? { minId: chatData.lastMessageId } : {}),
     limit: 3,
   });
+  // Sort latest messages in ascending order
+  messages = messages.sort((a, b) => a.id - b.id);
+  console.log(`Received ${messages.length} latest messages`);
 
   for (const message of messages) {
     console.log(`Processing message #${message.id}...`);
 
+    // Pre-set processed message id as last processed message
+    chatData.lastMessageId = message.id;
+    await chatsStore.set(chat, chatData);
+
+    console.log(`Filtering message #${message.id}...`);
     const response = await openaiClient.post<GptResponseData>(
       "/v1/chat/completions",
       {
@@ -62,7 +80,7 @@ const forwardFiltered = async (chat: string) => {
         messages: [
           {
             role: "user",
-            content: `Hi, please determine whether the following post contains any information about job position/vacancy for Frontend/Full-Stack/Backend in JavaScript/TypeScript. If false you MUST reply "0" otherwise "1".\n\n---\n${message.text}`,
+            content: `${POSITION_PROMPT}\n\n---\n${message.text}`,
           },
         ],
         max_tokens: 500, // Adjust this if necessary
@@ -96,6 +114,7 @@ app.use(async (req, res) => {
   try {
     // @opento_crypto
     // @workingincrypto
+    await forwardFiltered("opento_crypto");
 
     res.status(200).send("Forward completed");
   } catch (err) {

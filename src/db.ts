@@ -62,7 +62,11 @@ export const postedStore = Ydb<Posted>({
   },
 });
 
-export const chatsStore = Ydb<Posted>({
+type ChatState = {
+  lastMessageId: number | null;
+};
+
+export const chatsStore = Ydb<ChatState>({
   driver,
   driverOptions: { enableReadyCheck: true },
   tableOptions: {

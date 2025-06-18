@@ -9,6 +9,7 @@ import { getClient } from "./telegram";
 import { GptResponseData, openaiClient } from "./openai";
 import { getChatId } from "./utils";
 import { chatsStore } from "./db";
+import { RPCError } from "telegram/errors";
 
 const app = express();
 
@@ -31,7 +32,7 @@ function shiftEntities(
 }
 
 const POSITION_PROMPT = `
-Hi, please determine whether the following post contains any information about job position/vacancy for Frontend/Full-Stack/Backend in JavaScript/TypeScript/React.
+Hi, please determine whether the following post contains any information about job position/vacancy for Frontend/Full-Stack/Backend in JavaScript/TypeScript and React, Node.js.
 
 If false you MUST ONLY reply "0" otherwise "1".
 `;
@@ -39,14 +40,14 @@ If false you MUST ONLY reply "0" otherwise "1".
 const TARGET_CHANNEL_CHAT_ID = getChatId("2703233078");
 
 const forwardFiltered = async (chat: string) => {
-  console.log(`Starting forwarding for @${chat}...`);
+  console.log(`Start monitoring forward for @${chat}...`);
   const client = await getClient();
   const channel = (await client.getEntity(`@${chat}`)) as Api.Channel;
-  const channelFullInfo = await client.invoke(
-    new Api.channels.GetFullChannel({ channel })
-  );
-  // @ts-expect-error .flags is present and is number
-  const channelCanForward = (channelFullInfo.fullChat.flags & 1) === 0;
+  // const channelFullInfo = await client.invoke(
+  //   new Api.channels.GetFullChannel({ channel })
+  // );
+  // // @ts-expect-error .flags is present and is number
+  // const channelCanForward = (channelFullInfo.fullChat.flags & 1) === 0;
 
   const targetChannel = (await client.getEntity(
     TARGET_CHANNEL_CHAT_ID
@@ -54,7 +55,7 @@ const forwardFiltered = async (chat: string) => {
 
   let chatData = await chatsStore.get(chat);
   chatData ??= { lastMessageId: null };
-  console.log(`Last message id is #${chatData.lastMessageId}`);
+  console.log(`Last processed message was #${chatData.lastMessageId}`);
 
   console.log("Getting latest messages...");
   let messages = await client.getMessages(channel, {
@@ -95,10 +96,19 @@ const forwardFiltered = async (chat: string) => {
       continue;
     }
 
-    if (channelCanForward) {
+    try {
       console.log(`Forwarding message #${message.id}...`);
       await message.forwardTo(targetChannel);
-    } else {
+    } catch (error) {
+      if (
+        !(
+          error instanceof RPCError &&
+          error.errorMessage === "CHAT_FORWARDS_RESTRICTED"
+        )
+      ) {
+        throw error;
+      }
+
       console.log(`Resending message #${message.id}...`);
       const prependedText = `https://t.me/${channel.username}/${message.id}\n\n`;
       shiftEntities(message.entities, prependedText.length, "prepend");

@@ -32,7 +32,7 @@ function shiftEntities(
 }
 
 const POSITION_PROMPT = `
-Hi, please determine whether the following post contains any information about job position/vacancy for Frontend/Full-Stack/Backend in JavaScript/TypeScript and React, Node.js.
+Hi, please determine whether the following post contains any information about job position/vacancy for Frontend/Full-Stack/Backend in JavaScript/TypeScript and React, Node.js and NOT PHP/Java/Python/C#.
 
 If false you MUST ONLY reply "0" otherwise "1".
 `;

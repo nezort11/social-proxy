@@ -77,7 +77,7 @@ const forwardFiltered = async (chat: string) => {
     const response = await openaiClient.post<GptResponseData>(
       "/v1/chat/completions",
       {
-        model: "gpt-4o",
+        model: "gpt-4o-mini",
         messages: [
           {
             role: "user",

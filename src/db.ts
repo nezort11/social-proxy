@@ -2,6 +2,7 @@ import { Driver, getCredentialsFromEnv, TypedValues } from "ydb-sdk";
 import { Ydb } from "telegraf-session-store-ydb";
 import path from "path";
 import { MOUNT_ROOT_DIR_PATH, YDB_DATABASE, YDB_ENDPOINT } from "./env";
+import { VideoItem } from "./ytdl";
 
 process.env.YDB_SERVICE_ACCOUNT_KEY_FILE_CREDENTIALS = path.resolve(
   MOUNT_ROOT_DIR_PATH,
@@ -72,6 +73,17 @@ export const chatsStore = Ydb<ChatState>({
   tableOptions: {
     shouldCreateTable: true,
     tableName: "chats",
+    keyColumnName: "id",
+    sessionColumnName: "data",
+  },
+});
+
+export const musicStore = Ydb<VideoItem>({
+  driver,
+  driverOptions: { enableReadyCheck: true },
+  tableOptions: {
+    shouldCreateTable: true,
+    tableName: "music",
     keyColumnName: "id",
     sessionColumnName: "data",
   },

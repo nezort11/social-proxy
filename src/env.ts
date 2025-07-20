@@ -20,6 +20,8 @@ export const APIFY_API_TOKEN = process.env.APIFY_API_TOKEN;
 export const OPENAI_API_BASE_URL = process.env.OPENAI_API_BASE_URL;
 export const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
+export const YTDL_API_BASE_URL = process.env.YTDL_API_BASE_URL;
+
 export const PUBLISH_CHANNEL_ID = process.env.PUBLISH_CHANNEL_ID;
 export const PUBLISH_CHANNEL_CHAT_ID = getChatId(PUBLISH_CHANNEL_ID);
 

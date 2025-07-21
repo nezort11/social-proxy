@@ -19,13 +19,17 @@ const TARGET_CHANNEL_CHAT_ID = getChatId("1857955327");
 // const TARGET_CHANNEL_CHAT_ID = getChatId("1246932616");
 
 const forwardPlaylist = async () => {
+  console.log("Getting playlist videos info...");
   const playlistInfo = await getPlaylistInfo(
-    "https://www.youtube.com/playlist?list=PLsVXlJ_NFVRgSSr6ki-BThf7CY3mTMEHI"
+    "https://www.youtube.com/playlist?list=PLsVXlJ_NFVRgSSr6ki-BThf7CY3mTMEHI",
+    5 // limit number
   );
+  console.log("Playlist info:", playlistInfo);
 
   // for (const video of playlistInfo.videos) {
   for (let i = playlistInfo.videos.length - 1; i >= 0; i--) {
     const video = playlistInfo.videos[i];
+    console.log(`Iterating video ${video.id}...`);
 
     // check if video already processed - then exit
     const storedVideo = await musicStore.get(video.id);
@@ -65,7 +69,7 @@ const forwardPlaylist = async () => {
     );
     console.log("Sent audio to channel:", sendAudioResponse);
 
-    await sleep(10000);
+    await sleep(15000);
 
     // break;
   }

@@ -41,11 +41,14 @@ export interface PlaylistInfo {
   videos: VideoItem[];
 }
 
-export const getPlaylistInfo = async (playlistUrl: string) => {
+export const getPlaylistInfo = async (
+  playlistUrl: string,
+  limit?: number
+) => {
   const videoInfoResponse = await ytdlClient.get<PlaylistInfo>(
     "/playlist",
     {
-      params: { url: playlistUrl },
+      params: { url: playlistUrl, ...(limit && { limit }) },
     }
   );
   return videoInfoResponse.data;

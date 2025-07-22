@@ -33,6 +33,7 @@ app.use(async (req, res) => {
     await ingestLatestTweets("JohnPiper");
     await ingestLatestTweets("desiringGod");
     await ingestLatestTweets("timkellernyc");
+    await ingestLatestTweets("darwintojesus");
     res.status(200).send("Ingestion completed");
   } catch (err) {
     console.error("Ingestion failed:", err);

@@ -164,6 +164,13 @@ app.use(async (req, res) => {
     -4, // NY (EDT)
     getChatId("2414668710")
   );
+
+  await publishOldestTweets(
+    "darwintojesus",
+    -4 + 3, // NY (EDT)
+    getChatId("2751332882")
+  );
+
   res.end();
 });
 

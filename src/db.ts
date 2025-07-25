@@ -88,3 +88,14 @@ export const musicStore = Ydb<VideoItem>({
     sessionColumnName: "data",
   },
 });
+
+export const shortsStore = Ydb<VideoItem>({
+  driver,
+  driverOptions: { enableReadyCheck: true },
+  tableOptions: {
+    shouldCreateTable: true,
+    tableName: "shorts",
+    keyColumnName: "id",
+    sessionColumnName: "data",
+  },
+});

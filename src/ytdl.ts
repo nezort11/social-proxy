@@ -16,7 +16,7 @@ type VideoDownloadResponseData = {
   url: string;
 };
 
-export const downloadVideo = async (url: string, format: string) => {
+export const downloadVideo = async (url: string, format?: string) => {
   const videoDownloadResponse =
     await ytdlClient.post<VideoDownloadResponseData>("/download", null, {
       params: { url, ...(format && { format }) },

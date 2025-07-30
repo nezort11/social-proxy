@@ -14,11 +14,11 @@ import { sleep } from "telegram/Helpers";
 
 const app = express();
 
-const forwardShorts = async () => {
+const forwardShorts = async (playlistUrl: string) => {
   console.log("Getting playlist videos info...");
   const playlistInfo = await getPlaylistInfo(
-    "https://www.youtube.com/playlist?list=UUSHnrFlpro0xfYjz6s5Xa8WWw",
-    5 // limit number
+    playlistUrl,
+    3 // limit number
   );
   console.log("Playlist info:", playlistInfo);
 
@@ -38,7 +38,7 @@ const forwardShorts = async () => {
 
     console.log(`Processing video ${video.id}...`);
 
-    console.log("Requesting download youtube video audio...");
+    console.log("Requesting download youtube video...");
     const videoDataUrl = await downloadVideo(video.url);
     console.log(`Downloaded video ${video.id}: ${videoDataUrl}`);
 
@@ -60,8 +60,10 @@ const forwardShorts = async () => {
       {
         // title: video.title,
         // performer: "RBC Music", // video.uploader
-        caption: video.title,
+        // caption: video.title, // it looks better and more intrigue without title
         duration: video.duration,
+        width: 1080, // 180
+        height: 1920, // 320
       }
     );
     console.log("Sent video to channel:", sendVideoResponse);
@@ -74,7 +76,13 @@ const forwardShorts = async () => {
 
 app.use(async (req, res) => {
   try {
-    await forwardShorts();
+    await forwardShorts(
+      "https://www.youtube.com/playlist?list=UUSHnrFlpro0xfYjz6s5Xa8WWw"
+    );
+
+    await forwardShorts(
+      "https://www.youtube.com/playlist?list=UUSH0E50PbM6nV8hyPwaZLScEQ"
+    );
 
     res.status(200).send("Forward completed");
   } catch (err) {
@@ -86,7 +94,10 @@ app.use(async (req, res) => {
 export const handler = http(app);
 
 const main = async () => {
-  await forwardShorts();
+  await forwardShorts(
+    // "https://www.youtube.com/playlist?list=UUSHnrFlpro0xfYjz6s5Xa8WWw"
+    "https://www.youtube.com/playlist?list=UUSH0E50PbM6nV8hyPwaZLScEQ"
+  );
   process.exit(0);
 };
 if (require.main === module) {

@@ -75,7 +75,7 @@ resource "yandex_function" "music-forward-function" {
   name       = "music-forward-function"
   user_hash  = filebase64sha256("social-translator-bot.zip")
   runtime    = "nodejs18"
-  entrypoint = "build/forward.handler"
+  entrypoint = "build/forward_playlist.handler"
   service_account_id = var.service_account_id
 
   memory = 2048
@@ -86,6 +86,26 @@ resource "yandex_function" "music-forward-function" {
     zip_filename = "social-translator-bot.zip"
   }
 }
+
+resource "yandex_function" "shorts-forward-function" {
+  name       = "shorts-forward-function"
+  user_hash  = filebase64sha256("social-translator-bot.zip")
+  runtime    = "nodejs18"
+  entrypoint = "build/forward_shorts.handler"
+  service_account_id = var.service_account_id
+
+  memory = 2048
+  execution_timeout = 180
+  concurrency = 3
+
+  content {
+    zip_filename = "social-translator-bot.zip"
+  }
+}
+
+//
+// Triggers
+//
 
 resource "yandex_function_trigger" "social-ingest-function-trigger" {
   name        = "social-ingest-function-trigger"
@@ -130,7 +150,7 @@ resource "yandex_function_trigger" "social-forward-function-trigger" {
   }
 }
 
-resource "yandex_function_trigger" "social-forward-function-trigger" {
+resource "yandex_function_trigger" "music-forward-function-trigger" {
   name        = "music-forward-function-trigger"
   description = "Triggers the forward music every hour"
 
@@ -142,5 +162,19 @@ resource "yandex_function_trigger" "social-forward-function-trigger" {
   timer {
     # cron_expression = "*/5 * ? * * *"
     cron_expression = "0 * ? * * *"
+  }
+}
+
+resource "yandex_function_trigger" "shorts-forward-function-trigger" {
+  name        = "shorts-forward-function-trigger"
+  description = "Triggers the forward shorts every 3 hours"
+
+  function {
+    id = yandex_function.social-forward-function.id
+    service_account_id = var.service_account_id
+  }
+
+  timer {
+    cron_expression = "0 0/3 ? * * *"
   }
 }

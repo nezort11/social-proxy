@@ -34,7 +34,8 @@ const forwardPlaylist = async () => {
     // check if video already processed - then exit
     const storedVideo = await musicStore.get(video.id);
     if (storedVideo) {
-      return;
+      // return;
+      continue;
     }
 
     // add video to the already processed set

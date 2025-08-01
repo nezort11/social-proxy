@@ -30,7 +30,7 @@ const forwardShorts = async (playlistUrl: string) => {
     // check if video already processed - then exit
     const storedVideo = await shortsStore.get(video.id);
     if (storedVideo) {
-      return;
+      continue;
     }
 
     // add video to the already processed set
@@ -76,12 +76,17 @@ const forwardShorts = async (playlistUrl: string) => {
 
 app.use(async (req, res) => {
   try {
+    // Desiring God
     await forwardShorts(
       "https://www.youtube.com/playlist?list=UUSHnrFlpro0xfYjz6s5Xa8WWw"
     );
-
+    // HEBREW Ministries
     await forwardShorts(
       "https://www.youtube.com/playlist?list=UUSH0E50PbM6nV8hyPwaZLScEQ"
+    );
+    // Sermon Jams
+    await forwardShorts(
+      "https://www.youtube.com/playlist?list=UUSHV2XMCDq67_szgVPW9AHHtQ"
     );
 
     res.status(200).send("Forward completed");

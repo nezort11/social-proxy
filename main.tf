@@ -155,7 +155,7 @@ resource "yandex_function_trigger" "music-forward-function-trigger" {
   description = "Triggers the forward music every hour"
 
   function {
-    id = yandex_function.social-forward-function.id
+    id = yandex_function.music-forward-function.id
     service_account_id = var.service_account_id
   }
 
@@ -170,7 +170,7 @@ resource "yandex_function_trigger" "shorts-forward-function-trigger" {
   description = "Triggers the forward shorts every 3 hours"
 
   function {
-    id = yandex_function.social-forward-function.id
+    id = yandex_function.shorts-forward-function.id
     service_account_id = var.service_account_id
   }
 

@@ -105,6 +105,7 @@ resource "yandex_function" "shorts-forward-function" {
 
 //
 // Triggers
+// NOTE: changes to triggers may not apply correctly then try to re-create
 //
 
 resource "yandex_function_trigger" "social-ingest-function-trigger" {

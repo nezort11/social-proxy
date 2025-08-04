@@ -95,7 +95,7 @@ resource "yandex_function" "shorts-forward-function" {
   service_account_id = var.service_account_id
 
   memory = 2048
-  execution_timeout = 180
+  execution_timeout = 300
   concurrency = 3
 
   content {

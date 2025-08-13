@@ -38,37 +38,46 @@ const forwardPlaylist = async () => {
       continue;
     }
 
-    // add video to the already processed set
-    await musicStore.set(video.id, video);
-
     console.log(`Processing video ${video.id}...`);
 
-    console.log("Requesting download youtube video audio...");
-    const videoDataUrl = await downloadVideo(video.url, "m4a");
-    console.log(`Downloaded video ${video.id}: ${videoDataUrl}`);
+    try {
+      console.log("Requesting download youtube video audio...");
+      const videoDataUrl = await downloadVideo(
+        video.url,
+        "bestaudio[ext=m4a]/bestaudio" // m4a or webm
+      );
+      console.log(`Downloaded video ${video.id}: ${videoDataUrl}`);
 
-    console.log("Downloading video audio to buffer...");
-    const videoResponse = await axios.get<Buffer>(videoDataUrl, {
-      responseType: "arraybuffer",
-    });
-    const videoBuffer = videoResponse.data;
-    console.log("Video buffer length:", videoBuffer.byteLength);
+      console.log("Downloading video audio to buffer...");
+      const videoResponse = await axios.get<Buffer>(videoDataUrl, {
+        responseType: "arraybuffer",
+      });
+      const videoBuffer = videoResponse.data;
+      console.log("Video buffer length:", videoBuffer.byteLength);
 
-    console.log("Sending audio to target channel...");
-    const sendAudioResponse = await bot.telegram.sendAudio(
-      TARGET_CHANNEL_CHAT_ID,
-      {
-        // NOTE: "source" vs "url" - url is always sent as "document" not as "audio"
-        source: videoBuffer,
-        filename: `${video.title}.mp3`,
-      },
-      {
-        title: video.title,
-        performer: "RBC Music", // video.uploader
-        duration: video.duration,
-      }
-    );
-    console.log("Sent audio to channel:", sendAudioResponse);
+      console.log("Sending audio to target channel...");
+      const sendAudioResponse = await bot.telegram.sendAudio(
+        TARGET_CHANNEL_CHAT_ID,
+        {
+          // NOTE: "source" vs "url" - url is always sent as "document" not as "audio"
+          source: videoBuffer,
+          filename: `${video.title}.mp3`,
+        },
+        {
+          title: video.title,
+          performer: "RBC Music", // video.uploader
+          duration: video.duration,
+        }
+      );
+      console.log("Sent audio to channel:", sendAudioResponse);
+
+      // add video to the already processed set
+      // UPD: make post factum
+      await musicStore.set(video.id, video);
+    } catch (error) {
+      // what every happens suddenly or not - just log it and continue to next
+      console.error("Error processing video:", video.id, "error:", error);
+    }
 
     await sleep(15000);
 

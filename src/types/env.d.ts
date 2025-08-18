@@ -16,6 +16,7 @@ declare global {
       OPENAI_API_KEY: string;
 
       YTDL_API_BASE_URL: string;
+      VIDEO_TRANSLATE_API_URL: string;
 
       PUBLISH_CHANNEL_ID: string;
 

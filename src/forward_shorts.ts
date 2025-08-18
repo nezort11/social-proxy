@@ -3,14 +3,15 @@
  */
 import http from "serverless-http";
 import express from "express";
-import { Api } from "telegram";
+import axios from "axios";
+import { sleep } from "telegram/Helpers";
 
 import { getChatId } from "./utils";
 import { shortsStore } from "./db";
 import { downloadVideo, getPlaylistInfo } from "./ytdl";
 import { bot } from "./bot";
-import axios from "axios";
-import { sleep } from "telegram/Helpers";
+
+import { translateVideo } from "./vtrans";
 
 const app = express();
 
@@ -33,17 +34,27 @@ const forwardShorts = async (playlistUrl: string) => {
       continue;
     }
 
-    // add video to the already processed set
-    await shortsStore.set(video.id, video);
-
     console.log(`Processing video ${video.id}...`);
 
     console.log("Requesting download youtube video...");
     const videoDataUrl = await downloadVideo(video.url);
     console.log(`Downloaded video ${video.id}: ${videoDataUrl}`);
 
+    console.log("Translating full video...");
+    const translatedVideoData = await translateVideo(
+      video.url,
+      videoDataUrl,
+      "ru"
+    );
+    const translatedVideoUrl = translatedVideoData.url;
+    console.log(
+      "Translated full video:",
+      translatedVideoData,
+      translatedVideoUrl
+    );
+
     console.log("Downloading video to buffer...");
-    const videoResponse = await axios.get<Buffer>(videoDataUrl, {
+    const videoResponse = await axios.get<Buffer>(translatedVideoUrl, {
       responseType: "arraybuffer",
     });
     const videoBuffer = videoResponse.data;
@@ -67,6 +78,9 @@ const forwardShorts = async (playlistUrl: string) => {
       }
     );
     console.log("Sent video to channel:", sendVideoResponse);
+
+    // add video to the already processed set
+    await shortsStore.set(video.id, video);
 
     await sleep(15000);
 

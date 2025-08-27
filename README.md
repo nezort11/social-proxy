@@ -27,7 +27,7 @@ pnpm dev
 
 ## Scripts
 
-List all latest posted:
+### List all latest posted:
 
 ```sql
 SELECT *
@@ -46,4 +46,16 @@ Get specific author tweets:
 
 ```sql
 SELECT * FROM tweets WHERE JSON_VALUE(data, "$.author.userName") = "JohnPiper";
+```
+
+## Music
+
+Music table link:
+
+https://console.yandex.cloud/folders/b1gjh7irh9poadr6llcg/ydb/databases/etnuqad1rfmi6i6lc0h2/browse?path=%2Fmusic
+
+Delete music from posted
+
+```sql
+DELETE FROM `music` WHERE id = "pTPCs8FQnJQ";
 ```

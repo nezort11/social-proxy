@@ -1,5 +1,7 @@
 /**
  * Forward job service
+ *
+ * pnpm tsx ./src/forward_playlist.ts
  */
 import http from "serverless-http";
 import express from "express";
@@ -22,6 +24,7 @@ const forwardPlaylist = async () => {
   console.log("Getting playlist videos info...");
   const playlistInfo = await getPlaylistInfo(
     "https://www.youtube.com/playlist?list=PLsVXlJ_NFVRgSSr6ki-BThf7CY3mTMEHI",
+    // User can post up to 5 videos at the same time, so process in a single batch
     5 // limit number
   );
   console.log("Playlist info:", playlistInfo);

@@ -32,9 +32,16 @@ function shiftEntities(
 }
 
 const POSITION_PROMPT = `
-Hi, please determine whether the following post contains any information about job position/vacancy for Frontend/Full-Stack/Backend in JavaScript/TypeScript and React, Node.js and NOT PHP/Java/Python/C#.
+Hi, please determine whether the following post contains any information about job position/vacancy/role (NOT post about somebody who is looking for job / sharing his resume) that is about:
+- Frontend/Full-Stack/Backend role
+- JavaScript/TypeScript and React/Node.js mainly (Angular/Vue/etc. only if secondary)
+- NOT PHP/Java/Ruby/C#
+- NOT Intern/Junior position
 
 If false you MUST ONLY reply "0" otherwise "1".
+
+---
+
 `;
 
 const TARGET_CHANNEL_CHAT_ID = getChatId("2703233078");
@@ -81,7 +88,7 @@ const forwardFiltered = async (chat: string) => {
         messages: [
           {
             role: "user",
-            content: `${POSITION_PROMPT}\n\n---\n${message.text}`,
+            content: POSITION_PROMPT + message.text,
           },
         ],
         max_tokens: 500, // Adjust this if necessary
@@ -122,9 +129,44 @@ const forwardFiltered = async (chat: string) => {
 
 app.use(async (req, res) => {
   try {
-    // @opento_crypto
-    // @workingincrypto
+    // web3
     await forwardFiltered("opento_crypto");
+    await forwardFiltered("workingincrypto");
+    await forwardFiltered("cryptoheadhunter");
+    await forwardFiltered("job_web3");
+    await forwardFiltered("CryptoBlockchainJobs");
+    await forwardFiltered("cryptovakansii");
+    await forwardFiltered("holder_job_devs");
+    // await forwardFiltered("web3hiring");
+    await forwardFiltered("careers_crypto"); // careerscrypto.io
+    await forwardFiltered("web30job"); // careerscrypto.io
+    await forwardFiltered("jobstash");
+
+    await forwardFiltered("tonhunt");
+    // remote ok
+    // @remoteitjobs_app
+
+    await forwardFiltered("remote_jobs_relocate");
+    await forwardFiltered("opento_relocate");
+    await forwardFiltered("opento_dev");
+    await forwardFiltered("time2find");
+    await forwardFiltered("dev_connectablejobs");
+    await forwardFiltered("serbia_jobs");
+
+    // other
+    await forwardFiltered("Remoteit");
+    await forwardFiltered("it_vakansii_jobs");
+    await forwardFiltered("backend_frontend_jobs");
+    await forwardFiltered("sparklesjobs");
+
+    // await forwardFiltered("g_jobbot");
+    // [hh, habr, getmatch, hirify.me bots]
+
+    // bigtech
+    await forwardFiltered("ya_jobs");
+    await forwardFiltered("avito_career");
+    await forwardFiltered("vkjobs");
+    await forwardFiltered("tech_kuper");
 
     res.status(200).send("Forward completed");
   } catch (err) {

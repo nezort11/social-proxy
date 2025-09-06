@@ -15,7 +15,7 @@ import { PUBLISH_CHANNEL_CHAT_ID } from "./env";
 
 const app = express();
 
-const TARGET_UTC_OFFSET = 3;
+const TARGET_UTC_OFFSET = 3; // Europe/Moscow
 
 const getOneDayPassedUtcHours = (originalUtcOffset: number) => {
   const originalTargetUtcDiff = Math.abs(
@@ -28,12 +28,16 @@ const getOldestTweets = async (
   author: string,
   authorUtcOffset: number
 ) => {
+  console.log(`Getting oldest tweet for @${author}...`);
+
   await driver.ready(15000);
 
   const authorOneDayPassedUtcHours =
     getOneDayPassedUtcHours(authorUtcOffset);
 
   const oldestTweets: Tweet[] = [];
+  console.log("Creating ydb driver session...");
+
   await driver.tableClient.withSession(async (session: Session) => {
     const TWEET_CREATED_AT_TIMESTAMP =
       'CAST(JSON_VALUE(tweets.data, "$.createdAt") AS Timestamp)';
@@ -49,8 +53,10 @@ const getOldestTweets = async (
       LIMIT 1;
     `;
 
+    console.log("Querying ydb table for oldest tweets...");
     const result = await session.executeQuery(query);
     const rows = result.resultSets[0].rows;
+
     if (rows) {
       for (const row of rows) {
         const tweetDataText = row.items![0].textValue!;
@@ -91,6 +97,7 @@ const publishOldestTweets = async (
   authorUtcOffset: number,
   channelChatId: string
 ) => {
+  console.log(`Publishing tweets for @${author}...`);
   const tweets = await getOldestTweets(author, authorUtcOffset);
 
   const publishChannelChat = (await bot.telegram.getChat(

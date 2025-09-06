@@ -112,8 +112,10 @@ const publishOldestTweets = async (
     const TCO_LINK_REGEX = /https:\/\/t\.co\/[a-zA-Z0-9]+/g;
     const tcoLinks = tweet.text.match(TCO_LINK_REGEX);
 
-    const resultTweet = tweet.text.replace(TCO_LINK_REGEX, "");
-    const translatedTweet = await translateTweet(resultTweet);
+    // Remove twitter links from posts? why? (maybe better - make them working in russia)
+    // const resultTweet = tweet.text.replace(TCO_LINK_REGEX, "");
+    const tweetText = tweet.text;
+    const translatedTweet = await translateTweet(tweetText);
 
     // if private channel include invite link to channel
     const publishMessageHtml = isPrivateChannel

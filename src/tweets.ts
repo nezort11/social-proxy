@@ -123,7 +123,7 @@ export type Tweet = {
   source: string;
   text: string;
   twitterUrl: string;
-  type: string;
+  type: "tweet" | "mock_tweet";
   url: string;
   viewCount: number;
 };
@@ -212,7 +212,9 @@ export const getLatestTweets = async (author: string) => {
   const { items } = await client.dataset<Tweet>(datasetId).listItems();
   console.log(`Fetched ${items.length} items for run output dataset`);
 
-  return items;
+  const tweets = items.filter((item) => item.type === "tweet");
+
+  return tweets;
 };
 
 const main = async () => {

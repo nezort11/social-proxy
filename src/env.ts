@@ -29,3 +29,5 @@ export const PUBLISH_CHANNEL_CHAT_ID = getChatId(PUBLISH_CHANNEL_ID);
 export const API_ID = process.env.APP_ID!;
 export const APP_HASH = process.env.APP_HASH!;
 export const SESSION = process.env.SESSION;
+
+export const PROXY_URL = process.env.PROXY_URL;

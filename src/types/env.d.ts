@@ -23,6 +23,8 @@ declare global {
       API_ID: string;
       APP_HASH: string;
       SESSION: string;
+
+      PROXY_URL: string;
     }
   }
 }

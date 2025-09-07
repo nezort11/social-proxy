@@ -11,11 +11,38 @@ import { bot } from "./bot";
 import { getChatId } from "./utils";
 import axios from "axios";
 import { GptResponseData, openaiClient } from "./openai";
-import { PUBLISH_CHANNEL_CHAT_ID } from "./env";
+import { PUBLISH_CHANNEL_CHAT_ID, PROXY_URL } from "./env";
+import { getFinalUrl } from "./url-resolver";
 
 const app = express();
 
 const TARGET_UTC_OFFSET = 3; // Europe/Moscow
+
+/**
+ * Replace t.co links with their final destinations
+ */
+const normalizeTextTcoResolvedLinks = async (text: string) => {
+  const TCO_LINK_REGEX = /https:\/\/t\.co\/[a-zA-Z0-9]+/g;
+  const tcoLinks = text.match(TCO_LINK_REGEX);
+  if (!tcoLinks) {
+    return text;
+  }
+
+  let result = text;
+  for (const tcoLink of tcoLinks) {
+    try {
+      console.log(`Resolving t.co link: ${tcoLink}...`);
+      const finalUrl = await getFinalUrl(tcoLink, PROXY_URL);
+      result = result.replace(tcoLink, finalUrl);
+      console.log(`Replaced ${tcoLink} with ${finalUrl}`);
+    } catch (error) {
+      console.warn(`Failed to resolve ${tcoLink}:`, error);
+      // Keep original link as is if resolution fails
+    }
+  }
+
+  return result;
+};
 
 const getOneDayPassedUtcHours = (originalUtcOffset: number) => {
   const originalTargetUtcDiff = Math.abs(
@@ -112,10 +139,12 @@ const publishOldestTweets = async (
     const TCO_LINK_REGEX = /https:\/\/t\.co\/[a-zA-Z0-9]+/g;
     const tcoLinks = tweet.text.match(TCO_LINK_REGEX);
 
-    // Remove twitter links from posts? why? (maybe better - make them working in russia)
-    // const resultTweet = tweet.text.replace(TCO_LINK_REGEX, "");
-    const tweetText = tweet.text;
-    const translatedTweet = await translateTweet(tweetText);
+    const tweetTextWithResolvedLinks = await normalizeTextTcoResolvedLinks(
+      tweet.text
+    );
+    const translatedTweet = await translateTweet(
+      tweetTextWithResolvedLinks
+    );
 
     // if private channel include invite link to channel
     const publishMessageHtml = isPrivateChannel

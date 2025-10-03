@@ -46,7 +46,7 @@ If false you MUST ONLY reply "0" otherwise "1".
 
 const TARGET_CHANNEL_CHAT_ID = getChatId("2703233078");
 
-const TARGET_CHANNEL_CHAT_ID2 = getChatId("2703233078");
+const TARGET_CHANNEL_CHAT_ID2 = getChatId("3170116782");
 
 // Proxy messages (re-send without forward attribution)
 const forwardProxy = async (chat: string) => {
@@ -80,6 +80,13 @@ const forwardProxy = async (chat: string) => {
     await chatsStore.set(`proxy:${chat}`, chatData);
 
     try {
+      const text = message.message?.trim() ?? "";
+      if (text.length === 0) {
+        console.log(
+          `Skipping empty proxy message #${message.id} (no text to send)`
+        );
+        continue;
+      }
       console.log(
         `Re-sending message #${message.id} without attribution...`
       );

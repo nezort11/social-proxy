@@ -46,59 +46,6 @@ If false you MUST ONLY reply "0" otherwise "1".
 
 const TARGET_CHANNEL_CHAT_ID = getChatId("2703233078");
 
-const TARGET_CHANNEL_CHAT_ID2 = getChatId("3170116782");
-
-// Proxy messages (re-send without forward attribution)
-const forwardProxy = async (chat: string) => {
-  console.log(`Start proxying messages for @${chat}...`);
-  const client = await getClient();
-  const channel = (await client.getEntity(`@${chat}`)) as Api.Channel;
-  const targetChannel = (await client.getEntity(
-    TARGET_CHANNEL_CHAT_ID2
-  )) as Api.Channel;
-
-  let chatData = await chatsStore.get(`proxy:${chat}`);
-  chatData ??= { lastMessageId: null };
-  console.log(
-    `Last processed proxy message was #${chatData.lastMessageId}`
-  );
-
-  console.log("Getting latest messages...");
-  let messages = await client.getMessages(channel, {
-    ...(chatData.lastMessageId ? { minId: chatData.lastMessageId } : {}),
-    limit: 10,
-  });
-  // Sort latest messages in ascending order
-  messages = messages.sort((a, b) => a.id - b.id);
-  console.log(`Received ${messages.length} latest messages`);
-
-  for (const message of messages) {
-    console.log(`Processing proxy message #${message.id}...`);
-
-    // Pre-set processed message id as last processed message
-    chatData.lastMessageId = message.id;
-    await chatsStore.set(`proxy:${chat}`, chatData);
-
-    try {
-      const text = message.message?.trim() ?? "";
-      if (text.length === 0) {
-        console.log(
-          `Skipping empty proxy message #${message.id} (no text to send)`
-        );
-        continue;
-      }
-      console.log(
-        `Re-sending message #${message.id} without attribution...`
-      );
-      await client.sendMessage(targetChannel, {
-        message: message.message,
-        formattingEntities: message.entities,
-      });
-    } catch (error) {
-      console.error(`Failed to proxy message #${message.id}:`, error);
-    }
-  }
-};
 
 const forwardFiltered = async (chat: string) => {
   console.log(`Start monitoring forward for @${chat}...`);
@@ -183,16 +130,6 @@ const forwardFiltered = async (chat: string) => {
 
 app.use(async (req, res) => {
   try {
-    try {
-      // proxy all messages from @yandexfintech to private channel
-      await forwardProxy("yandexfintech");
-    } catch (error) {
-      console.error(
-        "Failed to proxy messages from @yandexfintech:",
-        error
-      );
-    }
-
     // web3
     await forwardFiltered("opento_crypto");
     await forwardFiltered("workingincrypto");

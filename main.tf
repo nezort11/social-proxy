@@ -103,6 +103,22 @@ resource "yandex_function" "shorts-forward-function" {
   }
 }
 
+resource "yandex_function" "social-forward-proxy-function" {
+  name       = "social-forward-proxy-function"
+  user_hash  = filebase64sha256("social-translator-bot.zip")
+  runtime    = "nodejs18"
+  entrypoint = "build/forward_proxy.handler"
+  service_account_id = var.service_account_id
+
+  memory = 2048
+  execution_timeout = 180
+  concurrency = 3
+
+  content {
+    zip_filename = "social-translator-bot.zip"
+  }
+}
+
 //
 // Triggers
 // NOTE: changes to triggers may not apply correctly then try to re-create
@@ -177,5 +193,19 @@ resource "yandex_function_trigger" "shorts-forward-function-trigger" {
 
   timer {
     cron_expression = "0 0/3 ? * * *"
+  }
+}
+
+resource "yandex_function_trigger" "social-forward-proxy-function-trigger" {
+  name        = "social-forward-proxy-function-trigger"
+  description = "Triggers the forward proxy every hour"
+
+  function {
+    id = yandex_function.social-forward-proxy-function.id
+    service_account_id = var.service_account_id
+  }
+
+  timer {
+    cron_expression = "0 * ? * * *"
   }
 }

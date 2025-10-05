@@ -46,7 +46,6 @@ If false you MUST ONLY reply "0" otherwise "1".
 
 const TARGET_CHANNEL_CHAT_ID = getChatId("2703233078");
 
-
 const forwardFiltered = async (chat: string) => {
   console.log(`Start monitoring forward for @${chat}...`);
   const client = await getClient();

@@ -7,6 +7,8 @@
   },
   "main": "./src/index.ts",
   "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
     "git:push": "git push origin main:main && git push template main:main",
     "command:js": "node",
     "command:ts": "pnpm tsx",
@@ -45,7 +47,7 @@
   },
   "dependencies": {
     "@types/express": "^5.0.1",
-    "@types/node": "^22.9.0",
+    "@yandex-cloud/nodejs-sdk": "^2.9.0",
     "apify-client": "^2.12.0",
     "axios": "^1.8.4",
     "dotenv": "16.4.4",
@@ -53,6 +55,7 @@
     "lodash": "^4.17.21",
     "p-timeout": "^6.1.4",
     "serverless-http": "3.2.0",
+    "socks-proxy-agent": "^8.0.5",
     "telegraf": "4.16.3",
     "telegraf-session-store-ydb": "^1.0.4",
     "telegram": "^2.26.22",
@@ -73,8 +76,11 @@
   },
   "devDependencies": {
     "@types/lodash": "^4.17.16",
+    "@types/node": "^22.9.0",
     "nodemon": "2.0.20",
+    "ts-node": "^10.9.2",
     "tsx": "^4.19.2",
-    "typescript": "5.6.3"
+    "typescript": "5.6.3",
+    "vitest": "^3.2.4"
   }
 }

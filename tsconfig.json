@@ -15,5 +15,8 @@
     "resolveJsonModule": true
   },
   "include": ["./src/**/*"],
+  "ts-node": {
+    "transpileOnly": true
+  },
   "exclude": ["node_modules"]
 }

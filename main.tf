@@ -169,16 +169,15 @@ resource "yandex_function_trigger" "social-forward-function-trigger" {
 
 resource "yandex_function_trigger" "music-forward-function-trigger" {
   name        = "music-forward-function-trigger"
-  description = "Triggers the forward music every 12 hour"
+  description = "Triggers the forward music every day at 8:00 AM UTC+3"
 
   function {
-    id = yandex_function.music-forward-function.id
+    id                 = yandex_function.music-forward-function.id
     service_account_id = var.service_account_id
   }
 
   timer {
-    # cron_expression = "*/5 * ? * * *"
-    cron_expression = "0 0/12 ? * * *"
+    cron_expression = "0 5 * * *"
   }
 }
 

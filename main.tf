@@ -177,7 +177,7 @@ resource "yandex_function_trigger" "music-forward-function-trigger" {
   }
 
   timer {
-    cron_expression = "0 5 * * *"
+    cron_expression = "0 5 * * ? *"
   }
 }
 

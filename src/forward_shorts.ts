@@ -15,85 +15,109 @@ import { translateVideo } from "./vtrans";
 
 const app = express();
 
+const TARGET_CHANNEL_CHAT_ID = getChatId("2638427623");
+
 const forwardShorts = async (playlistUrl: string) => {
   console.log("Getting playlist videos info...");
-  const playlistInfo = await getPlaylistInfo(
-    playlistUrl,
-    3 // limit number
-  );
-  console.log("Playlist info:", playlistInfo);
-
-  // for (const video of playlistInfo.videos) {
-  for (let i = playlistInfo.videos.length - 1; i >= 0; i--) {
-    const video = playlistInfo.videos[i];
-    console.log(`Iterating video ${video.id}...`);
-
-    // check if video already processed - then exit
-    const storedVideo = await shortsStore.get(video.id);
-    if (storedVideo) {
-      continue;
-    }
-
-    console.log(`Processing video ${video.id}...`);
-
-    console.log("Requesting download youtube video...");
-    const videoDataUrl = await downloadVideo(video.url);
-    console.log(`Downloaded video ${video.id}: ${videoDataUrl}`);
-
-    console.log("Translating full video...");
-    const translatedVideoData = await translateVideo(
-      video.url,
-      videoDataUrl,
-      "ru"
+  try {
+    const playlistInfo = await getPlaylistInfo(
+      playlistUrl,
+      3 // limit number
     );
-    const translatedVideoUrl = translatedVideoData.url;
-    console.log(
-      "Translated full video:",
-      translatedVideoData,
-      translatedVideoUrl
-    );
+    console.log("Playlist info:", playlistInfo);
 
-    console.log("Downloading video to buffer...");
-    const videoResponse = await axios.get<Buffer>(translatedVideoUrl, {
-      responseType: "arraybuffer",
-    });
-    const videoBuffer = videoResponse.data;
-    console.log("Video buffer length:", videoBuffer.byteLength);
+    // for (const video of playlistInfo.videos) {
+    for (let i = playlistInfo.videos.length - 1; i >= 0; i--) {
+      const video = playlistInfo.videos[i];
+      console.log(`Iterating video ${video.id}...`);
 
-    console.log("Sending video to target channel...");
-    const sendVideoResponse = await bot.telegram.sendVideo(
-      getChatId("2638427623"),
-      {
-        // NOTE: "source" vs "url" - url is always sent as "document" not as "audio"
-        source: videoBuffer,
-        filename: `${video.title}.mp4`,
-      },
-      {
-        // title: video.title,
-        // performer: "RBC Music", // video.uploader
-        // caption: video.title, // it looks better and more intrigue without title
-        duration: video.duration,
-        width: 1080, // 180
-        height: 1920, // 320
+      try {
+        // check if video already processed - then exit
+        const storedVideo = await shortsStore.get(video.id);
+        if (storedVideo) {
+          continue;
+        }
+
+        console.log(`Processing video ${video.id}...`);
+
+        console.log("Requesting download youtube video...");
+        const videoDataUrl = await downloadVideo(video.url);
+        console.log(`Downloaded video ${video.id}: ${videoDataUrl}`);
+
+        console.log("Translating full video...");
+        const translatedVideoData = await translateVideo(
+          video.url,
+          videoDataUrl,
+          "ru"
+        );
+        const translatedVideoUrl = translatedVideoData.url;
+        console.log(
+          "Translated full video:",
+          translatedVideoData,
+          translatedVideoUrl
+        );
+
+        console.log("Downloading video to buffer...");
+        const videoResponse = await axios.get<Buffer>(translatedVideoUrl, {
+          responseType: "arraybuffer",
+        });
+        const videoBuffer = videoResponse.data;
+        console.log("Video buffer length:", videoBuffer.byteLength);
+
+        console.log("Sending video to target channel...");
+        const sendVideoResponse = await bot.telegram.sendVideo(
+          TARGET_CHANNEL_CHAT_ID,
+          {
+            // NOTE: "source" vs "url" - url is always sent as "document" not as "audio"
+            source: videoBuffer,
+            filename: `${video.title}.mp4`,
+          },
+          {
+            // title: video.title,
+            // performer: "RBC Music", // video.uploader
+            // caption: video.title, // it looks better and more intrigue without title
+            duration: video.duration,
+            width: 1080, // 180
+            height: 1920, // 320
+          }
+        );
+        console.log("Sent video to channel:", sendVideoResponse);
+
+        // add video to the already processed set
+        await shortsStore.set(video.id, video);
+      } catch (err) {
+        console.error("Error processing video:", video.id, "error:", err);
+        continue;
       }
-    );
-    console.log("Sent video to channel:", sendVideoResponse);
 
-    // add video to the already processed set
-    await shortsStore.set(video.id, video);
-
-    await sleep(15000);
-
-    // break;
+      await sleep(15000);
+    }
+  } catch (err) {
+    console.error("Forward failed:", err);
   }
+};
+
+const getYoutubeChannelShortsPlaylistUrl = (channelId: string) => {
+  // "UC..." -> "UUSH..."
+  const channelShortsPlaylistId = "UUSH" + channelId.slice(2);
+  return `https://www.youtube.com/playlist?list=${channelShortsPlaylistId}`;
 };
 
 app.use(async (req, res) => {
   try {
+    // Gospel Coalition
+    await forwardShorts(
+      getYoutubeChannelShortsPlaylistUrl("UCQMwm-DeHyFK5VPp6KySR5Q")
+    );
+    // Gospel in Life
+    await forwardShorts(
+      getYoutubeChannelShortsPlaylistUrl("UCQmUmqrMGfnesNpdL7T282Q")
+    );
     // Desiring God
     await forwardShorts(
       "https://www.youtube.com/playlist?list=UUSHnrFlpro0xfYjz6s5Xa8WWw"
     );
+
     // HEBREW Ministries
     await forwardShorts(
       "https://www.youtube.com/playlist?list=UUSH0E50PbM6nV8hyPwaZLScEQ"
@@ -101,6 +125,32 @@ app.use(async (req, res) => {
     // Sermon Jams
     await forwardShorts(
       "https://www.youtube.com/playlist?list=UUSHV2XMCDq67_szgVPW9AHHtQ"
+    );
+
+    // Grace to You
+    await forwardShorts(
+      "https://www.youtube.com/playlist?list=UUSHneKpMu9SFGlt2usTdAI75A"
+    );
+    // Ligonier Ministries
+    await forwardShorts(
+      "https://www.youtube.com/playlist?list=UUSHut8939DdQsJI3Gw1ziAc4w"
+    );
+    // Wretched
+    await forwardShorts(
+      "https://www.youtube.com/playlist?list=UUSHdlxWNzGGPKzQLMXkkyZkUQ"
+    );
+
+    // Cross Examined
+    await forwardShorts(
+      "https://www.youtube.com/playlist?list=UUSHedYGs_lqq1uNet0u7qlSyQ"
+    );
+    // Answers in Genesis
+    await forwardShorts(
+      "https://www.youtube.com/playlist?list=UUSHicvc24eAbFp-thRrBnSP2A"
+    );
+    // Bible Animations
+    await forwardShorts(
+      "https://www.youtube.com/playlist?list=UUSHRKZqt7rf6_Lo5rFwuPTKmw"
     );
 
     res.status(200).send("Forward completed");

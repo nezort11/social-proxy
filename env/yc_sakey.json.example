@@ -1,0 +1,4 @@
+# How to create this service account key?
+# Go to https://console.yandex.cloud/folders/b1gjh7irh9poadr6llcg/iam/service-account/
+# Create new "Authorized key"
+# Download key as JSON key

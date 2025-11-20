@@ -30,4 +30,6 @@ export const API_ID = process.env.APP_ID!;
 export const APP_HASH = process.env.APP_HASH!;
 export const SESSION = process.env.SESSION;
 
-export const PROXY_URL = process.env.PROXY_URL;
+// Proxy configuration
+export const PROXY_URL = process.env.PROXY_URL; // SOCKS5 proxy URL (e.g., "socks5://user:pass@host:port") - IPv4 only
+export const EHP_PROXY_URL = process.env.EHP_PROXY_URL; // Edge HTTP Proxy URL

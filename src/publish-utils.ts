@@ -34,7 +34,7 @@ export const normalizeTextTcoResolvedLinks = async (text: string) => {
       console.log(`  ${tcoLink} -> ${finalUrl}`);
       result = result.replace(tcoLink, finalUrl);
     } catch (error) {
-      console.error(`  Failed to resolve ${tcoLink}:`, error.message);
+      console.error(`  Failed to resolve ${tcoLink}:`, error);
       // Keep original link as is if resolution fails
     }
   }

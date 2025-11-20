@@ -79,7 +79,7 @@ describe("resolveFinalUrl with EHP proxy", () => {
     } catch (error) {
       // If the URL doesn't exist, that's okay for this test
       // The important thing is that the proxy can reach t.co
-      console.log("t.co test URL may not exist, error:", error.message);
+      console.log("t.co test URL may not exist, error:", error);
     }
   }, 40000);
 

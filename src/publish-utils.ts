@@ -4,10 +4,25 @@ import { resolveFinalUrl, ProxyConfig } from "./url-resolver";
 /**
  * Replace t.co links with their final destinations
  * Uses EHP (Edge HTTP Proxy) from environment variable
+ *
+ * Note: buff.ly links are detected but NOT resolved due to Vercel bot protection (Vercel Security Checkpoint - x-vercel-mitigated: challenge)
+ * See BUFF_LY_ANALYSIS.md for details
  */
 export const normalizeTextTcoResolvedLinks = async (text: string) => {
   const TCO_LINK_REGEX = /https:\/\/t\.co\/[a-zA-Z0-9]+/g;
+  const BUFFLY_LINK_REGEX = /https?:\/\/buff\.ly\/[a-zA-Z0-9]+/g;
+
   const tcoLinks = text.match(TCO_LINK_REGEX);
+  const bufflyLinks = text.match(BUFFLY_LINK_REGEX);
+
+  // Log buff.ly links if found (cannot auto-resolve due to bot protection)
+  if (bufflyLinks) {
+    console.warn(
+      `⚠️  Found ${bufflyLinks.length} buff.ly link(s) that cannot be auto-resolved (Vercel bot protection):`
+    );
+    bufflyLinks.forEach((link) => console.warn(`  - ${link}`));
+  }
+
   if (!tcoLinks) {
     return text;
   }

@@ -119,9 +119,16 @@ const publishOldestTweets = async (
     const tweetTextWithResolvedLinks = await normalizeTextTcoResolvedLinks(
       tweet.text
     );
-    const translatedTweet = await translateTweet(
-      tweetTextWithResolvedLinks
-    );
+
+    // Remove Twitter media URLs (photo/video links) that shouldn't appear in the text
+    // These are automatically added by Twitter when tweets have media attachments
+    const TWITTER_MEDIA_URL_REGEX =
+      /https:\/\/(twitter\.com|x\.com)\/\w+\/status\/\d+\/(photo|video)\/\d+/g;
+    const cleanedTweetText = tweetTextWithResolvedLinks
+      .replace(TWITTER_MEDIA_URL_REGEX, "")
+      .trim();
+
+    const translatedTweet = await translateTweet(cleanedTweetText);
 
     // if private channel include invite link to channel
     const publishMessageHtml = isPrivateChannel

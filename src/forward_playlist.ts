@@ -59,15 +59,19 @@ const forwardPlaylist = async () => {
       console.log("Video buffer length:", videoBuffer.byteLength);
 
       console.log("Sending audio to target channel...");
+
+      // Normalize title by replacing multiple spaces with single space and trimming
+      const normalizedTitle = video.title.replace(/\s+/g, " ").trim();
+
       const sendAudioResponse = await bot.telegram.sendAudio(
         TARGET_CHANNEL_CHAT_ID,
         {
           // NOTE: "source" vs "url" - url is always sent as "document" not as "audio"
           source: videoBuffer,
-          filename: `${video.title}.mp3`,
+          filename: `${normalizedTitle}.mp3`,
         },
         {
-          title: video.title,
+          title: normalizedTitle,
           performer: "RBC Music", // video.uploader
           duration: video.duration,
         }

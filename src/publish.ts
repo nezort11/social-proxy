@@ -194,6 +194,9 @@ const publishProxyOldestTweets = async (
 
     await bot.telegram.sendMessage(channelChatId, publishMessageHtml, {
       parse_mode: "HTML",
+      link_preview_options: {
+        show_above_text: true,
+      },
     });
 
     await postedStore.set(tweet.id, {

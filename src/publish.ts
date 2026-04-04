@@ -23,14 +23,14 @@ export { normalizeTextTcoResolvedLinks };
 
 const getOneDayPassedUtcHours = (originalUtcOffset: number) => {
   const originalTargetUtcDiff = Math.abs(
-    TARGET_UTC_OFFSET - originalUtcOffset
+    TARGET_UTC_OFFSET - originalUtcOffset,
   );
   return 24 - originalTargetUtcDiff;
 };
 
 const getOldestTweets = async (
   author: string,
-  authorUtcOffset: number
+  authorUtcOffset: number,
 ) => {
   console.log(`Getting oldest tweet for @${author}...`);
 
@@ -86,7 +86,7 @@ const translateTweet = async (tweetText: string) => {
         },
       ],
       max_tokens: 500, // Adjust this if necessary
-    }
+    },
   );
   const translatedTweetData = response.data;
   const translatedTweetMessage = translatedTweetData.choices[0].message;
@@ -99,13 +99,13 @@ const translateTweet = async (tweetText: string) => {
 const publishOldestTweets = async (
   author: string,
   authorUtcOffset: number,
-  channelChatId: string
+  channelChatId: string,
 ) => {
   console.log(`Publishing tweets for @${author}...`);
   const tweets = await getOldestTweets(author, authorUtcOffset);
 
   const publishChannelChat = (await bot.telegram.getChat(
-    channelChatId
+    channelChatId,
   )) as Chat.ChannelGetChat;
   // const isPrivateChannel = !!publishChannelChat.active_usernames?.length;
   const isPrivateChannel = true;
@@ -117,7 +117,7 @@ const publishOldestTweets = async (
     const tcoLinks = tweet.text.match(TCO_LINK_REGEX);
 
     const tweetTextWithResolvedLinks = await normalizeTextTcoResolvedLinks(
-      tweet.text
+      tweet.text,
     );
 
     // Remove Twitter media URLs (photo/video links) that shouldn't appear in the text
@@ -147,7 +147,7 @@ const publishOldestTweets = async (
         {
           caption: publishMessageHtml,
           parse_mode: "HTML",
-        }
+        },
       );
     } else {
       await bot.telegram.sendMessage(channelChatId, publishMessageHtml, {
@@ -164,33 +164,79 @@ const publishOldestTweets = async (
   }
 };
 
+const publishProxyOldestTweets = async (
+  author: string,
+  authorUtcOffset: number,
+  channelChatId: string,
+) => {
+  console.log(`Publishing proxy tweets for @${author}...`);
+  const tweets = await getOldestTweets(author, authorUtcOffset);
+
+  const publishChannelChat = (await bot.telegram.getChat(
+    channelChatId,
+  )) as Chat.ChannelGetChat;
+
+  const isPrivateChannel = true;
+  const publishChannelInviteLink = publishChannelChat.invite_link;
+
+  for (const tweet of tweets) {
+    const originalUrl =
+      tweet.twitterUrl || `https://x.com/${author}/status/${tweet.id}`;
+    let fxtwitterUrl = originalUrl.replace(
+      /https:\/\/(twitter\.com|x\.com)/i,
+      "https://fxtwitter.com",
+    );
+
+    const publishMessageHtml =
+      isPrivateChannel && publishChannelInviteLink
+        ? `${fxtwitterUrl}\n\n<a href="${publishChannelInviteLink}">@️ ${publishChannelChat.title}</a>`
+        : fxtwitterUrl;
+
+    await bot.telegram.sendMessage(channelChatId, publishMessageHtml, {
+      parse_mode: "HTML",
+    });
+
+    await postedStore.set(tweet.id, {
+      postedAt: new Date().toISOString(),
+    });
+  }
+};
+
 app.use(async (req, res) => {
+  // await publishOldestTweets(
+  //   "desiringGod",
+  //   -5, // Minneapolis (CDT)
+  //   desiringGodChannelChatId
+  // );
   await publishOldestTweets(
-    "oliverburdick",
-    -4, // Boston (EDT)
-    PUBLISH_CHANNEL_CHAT_ID
+    "timkellernyc",
+    -4 + 3, // NY (EDT)
+    getChatId("2414668710"),
   );
+
   const desiringGodChannelChatId = getChatId("2502755801");
   await publishOldestTweets(
     "JohnPiper",
-    -5, // Minneapolis (CDT)
-    desiringGodChannelChatId
-  );
-  await publishOldestTweets(
-    "desiringGod",
-    -5, // Minneapolis (CDT)
-    desiringGodChannelChatId
-  );
-  await publishOldestTweets(
-    "timkellernyc",
-    -4, // NY (EDT)
-    getChatId("2414668710")
+    -5 + 3, // Minneapolis (CDT)
+    desiringGodChannelChatId,
   );
 
-  await publishOldestTweets(
-    "darwintojesus",
-    -4 + 3, // NY (EDT)
-    getChatId("2751332882")
+  // await publishOldestTweets(
+  //   "oliverburdick",
+  //   -4, // Boston (EDT)
+  //   PUBLISH_CHANNEL_CHAT_ID
+  // );
+
+  // await publishOldestTweets(
+  //   "darwintojesus",
+  //   -4 + 3, // NY (EDT)
+  //   getChatId("2751332882")
+  // );
+
+  await publishProxyOldestTweets(
+    "ThePrimeagen",
+    -8 + 3, // PST (California)
+    getChatId("3697707745"),
   );
 
   res.end();
@@ -199,7 +245,23 @@ app.use(async (req, res) => {
 export const handler = http(app);
 
 const main = async () => {
-  await publishOldestTweets("oliverburdick", -4, PUBLISH_CHANNEL_CHAT_ID);
+  await publishOldestTweets(
+    "timkellernyc",
+    -4 + 3, // NY (EDT)
+    getChatId("2414668710"),
+  );
+
+  // await publishOldestTweets(
+  //   "darwintojesus",
+  //   -4 + 3,
+  //   getChatId("2751332882")
+  // );
+
+  await publishProxyOldestTweets(
+    "ThePrimeagen",
+    -8 + 3, // PST (California)
+    getChatId("3697707745"),
+  );
   process.exit(0);
 };
 if (require.main === module) {

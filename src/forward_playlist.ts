@@ -25,7 +25,7 @@ const forwardPlaylist = async () => {
   const playlistInfo = await getPlaylistInfo(
     "https://www.youtube.com/playlist?list=PLsVXlJ_NFVRgSSr6ki-BThf7CY3mTMEHI",
     // User can post up to 5 videos at the same time, so process in a single batch
-    5 // limit number
+    5, // limit number
   );
   console.log("Playlist info:", playlistInfo);
 
@@ -47,7 +47,7 @@ const forwardPlaylist = async () => {
       console.log("Requesting download youtube video audio...");
       const videoDataUrl = await downloadVideo(
         video.url,
-        "bestaudio[ext=m4a]/bestaudio" // m4a or webm
+        "bestaudio[ext=m4a]/bestaudio", // m4a or webm
       );
       console.log(`Downloaded video ${video.id}: ${videoDataUrl}`);
 
@@ -74,7 +74,7 @@ const forwardPlaylist = async () => {
           title: normalizedTitle,
           performer: "RBC Music", // video.uploader
           duration: video.duration,
-        }
+        },
       );
       console.log("Sent audio to channel:", sendAudioResponse);
 

@@ -31,6 +31,27 @@ function shiftEntities(
   return entities;
 }
 
+// Frontend React, Fullstack React + Nodejs, Mobile - React / React Native =>
+// TypeScript/JavaScript lang + React/Nodejs/React Native framework
+/*
+tech:
+- JavaScript/Typescript, SQL
+- React, Nodejs, React Native
+
+positions:
+- 1. Frontend, 2. Fullstack (apps), 3. Mobile/Frontend (apps), 4. Backend (bots/etc)
+
+locations:
+- SaintPetersburg/Moscow, Armenia, Cyprus/Dubai, US/EU/Latam?
+
+sphere:
+- web3, fintech/web2, bigtech?
+
+ru:
+ru ?
+isis ?
+en (eu/us/etc) ?
+*/
 const POSITION_PROMPT = `
 Hi, please determine whether the following post contains any information about job position/vacancy/role (NOT post about somebody who is looking for job / sharing his resume) that is about:
 - Frontend/Full-Stack/Backend role

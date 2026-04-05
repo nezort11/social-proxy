@@ -218,7 +218,8 @@ export const getLatestTweets = async (author: string) => {
 };
 
 const main = async () => {
-  // await getLatestTweets();
+  // const tweets = await getLatestTweets("timkellernyc");
+  // console.log("timkellernyc", tweets.length, " tweets:", tweets);
 
   process.exit(0);
 };

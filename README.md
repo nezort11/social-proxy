@@ -25,7 +25,11 @@ pnpm install
 pnpm dev
 ```
 
-## Scripts
+## Republish posts
+
+https://console.yandex.cloud/folders/b1gjh7irh9poadr6llcg/ydb/databases/etnuqad1rfmi6i6lc0h2/browse?path=%2Ftweets
+
+https://console.yandex.cloud/folders/b1gjh7irh9poadr6llcg/ydb/databases/etnuqad1rfmi6i6lc0h2/browse?path=%2Fposted
 
 ### List all latest posted:
 

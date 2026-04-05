@@ -31,6 +31,8 @@
     "app:cd": "pnpm tf apply -auto-approve",
     "app:cicd": "pnpm app:ci && pnpm app:cd",
     "env:pre": "source ./env/.env",
+    "env:backup": "zip -r env-artifacts.zip terraform.tfstate terraform.tfstate.backup .terraform.lock.hcl main.tf variables.tf outputs.tf package.json env/ && yc storage s3api put-object --bucket nezort11-bot-env --key social-translator/env-artifacts.zip --body ./env-artifacts.zip && rm env-artifacts.zip",
+    "env:restore": "yc storage s3api get-object --bucket nezort11-bot-env --key social-translator/env-artifacts.zip env-artifacts.zip && unzip -o env-artifacts.zip && rm env-artifacts.zip",
     "webhook:info": "source ./env/.env && pnpm telegraf -m getWebhookInfo -t $BOT_TOKEN",
     "webhook:set": "pnpm env:pre && pnpm telegraf -m setWebhook -t $BOT_TOKEN -D \"{ \\\"url\\\": \\\"https://$(terraform output -raw lpman_bot_gateway_domain)/webhook\\\", \\\"drop_pending_updates\\\": \\\"True\\\" }\"",
     "webhook:delete": "pnpm env:pre && pnpm telegraf -m deleteWebhook -t $BOT_TOKEN"

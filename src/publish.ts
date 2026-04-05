@@ -168,6 +168,7 @@ const publishProxyOldestTweets = async (
   author: string,
   authorUtcOffset: number,
   channelChatId: string,
+  translateLanguage?: string
 ) => {
   console.log(`Publishing proxy tweets for @${author}...`);
   const tweets = await getOldestTweets(author, authorUtcOffset);
@@ -186,6 +187,9 @@ const publishProxyOldestTweets = async (
       /https:\/\/(twitter\.com|x\.com)/i,
       "https://fxtwitter.com",
     );
+    if (translateLanguage) {
+      fxtwitterUrl = `${fxtwitterUrl}/${translateLanguage}`;
+    }
 
     const publishMessageHtml =
       isPrivateChannel && publishChannelInviteLink
@@ -242,6 +246,13 @@ app.use(async (req, res) => {
     getChatId("3697707745"),
   );
 
+  await publishProxyOldestTweets(
+    "sola_chad",
+    -5 + 3, // CST
+    getChatId("3625292073"),
+    "ru"
+  );
+
   res.end();
 });
 
@@ -264,6 +275,13 @@ const main = async () => {
     "ThePrimeagen",
     -8 + 3, // PST (California)
     getChatId("3697707745"),
+  );
+
+  await publishProxyOldestTweets(
+    "sola_chad",
+    -5 + 3, // CST
+    getChatId("3625292073"),
+    "ru"
   );
   process.exit(0);
 };

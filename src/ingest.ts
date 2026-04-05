@@ -35,6 +35,7 @@ app.use(async (req, res) => {
     await ingestLatestTweets("timkellernyc");
     await ingestLatestTweets("darwintojesus");
     await ingestLatestTweets("ThePrimeagen");
+    await ingestLatestTweets("sola_chad");
     res.status(200).send("Ingestion completed");
   } catch (err) {
     console.error("Ingestion failed:", err);
@@ -47,6 +48,7 @@ export const handler = http(app);
 const main = async () => {
   await ingestLatestTweets("darwintojesus");
   await ingestLatestTweets("ThePrimeagen");
+  await ingestLatestTweets("sola_chad");
   process.exit(0);
 };
 if (require.main === module) {

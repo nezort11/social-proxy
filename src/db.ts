@@ -1,16 +1,22 @@
 import { Driver, getCredentialsFromEnv, TypedValues } from "ydb-sdk";
 import { Ydb } from "telegraf-session-store-ydb";
 import path from "path";
-import { MOUNT_ROOT_DIR_PATH, YDB_DATABASE, YDB_ENDPOINT } from "./env";
+import {
+  LAMBDA_TASK_ROOT,
+  MOUNT_ROOT_DIR_PATH,
+  YDB_DATABASE,
+  YDB_ENDPOINT,
+} from "./env";
 import { VideoItem } from "./ytdl";
 
-process.env.YDB_SERVICE_ACCOUNT_KEY_FILE_CREDENTIALS = path.resolve(
-  MOUNT_ROOT_DIR_PATH,
-  "./env/yc_sakey.json"
-);
+if (!LAMBDA_TASK_ROOT) {
+  process.env.YDB_SERVICE_ACCOUNT_KEY_FILE_CREDENTIALS = path.resolve(
+    __dirname,
+    "../env/yc_sakey.json"
+  );
+}
+
 export const driver = new Driver({
-  // connectionString does not work for some reason
-  // connectionString: "",
   endpoint: YDB_ENDPOINT,
   database: YDB_DATABASE,
   authService: getCredentialsFromEnv(),

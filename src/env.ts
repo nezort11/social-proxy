@@ -2,15 +2,15 @@ import path from "path";
 import * as dotenv from "dotenv";
 import { getChatId } from "./utils";
 
-export const LAMBDA_TASK_ROOT = false; //process.env.LAMBDA_TASK_ROOT;
+export const LAMBDA_TASK_ROOT = process.env.LAMBDA_TASK_ROOT;
 export const MOUNT_ROOT_DIR_PATH = LAMBDA_TASK_ROOT ? "../storage/" : "./";
 
 dotenv.config({ path: path.join(MOUNT_ROOT_DIR_PATH, "./env/.env") });
 
 export const APP_ENV = process.env.APP_ENV;
 
-export const BOT_TOKEN = process.env.BOT_TOKEN_DEV;
-// APP_ENV === "local" ? process.env.BOT_TOKEN_DEV : process.env.BOT_TOKEN;
+export const BOT_TOKEN =
+  APP_ENV === "production" ? process.env.BOT_TOKEN : process.env.BOT_TOKEN_DEV;
 
 export const YDB_ENDPOINT = process.env.YDB_ENDPOINT;
 export const YDB_DATABASE = process.env.YDB_DATABASE;

@@ -101,12 +101,26 @@ const publishOldestTweets = async (
   authorUtcOffset: number,
   channelChatId: string,
 ) => {
-  console.log(`Publishing tweets for @${author}...`);
+  const botInfo = await bot.telegram.getMe();
+  console.log(`Publishing as @${botInfo.username} to ${channelChatId} for @${author}`);
   const tweets = await getOldestTweets(author, authorUtcOffset);
 
-  const publishChannelChat = (await bot.telegram.getChat(
-    channelChatId,
-  )) as Chat.ChannelGetChat;
+  let publishChannelChat: Chat.ChannelGetChat;
+  try {
+    publishChannelChat = (await bot.telegram.getChat(
+      channelChatId,
+    )) as Chat.ChannelGetChat;
+  } catch (err) {
+    console.error(`Failed to find chat ${channelChatId} for @${author}. Error: ${err}`);
+    // Try with username if it's timkellernyc/timkellerru
+    if (author === "timkellernyc") {
+        console.log("Trying to find chat by username @timkellerru...");
+        publishChannelChat = (await bot.telegram.getChat("@timkellerru")) as Chat.ChannelGetChat;
+        console.log(`Found chat @timkellerru with ID ${publishChannelChat.id}`);
+    } else {
+        throw err;
+    }
+  }
   // const isPrivateChannel = !!publishChannelChat.active_usernames?.length;
   const isPrivateChannel = true;
   // invite link should always be present in private/public channel

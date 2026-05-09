@@ -3,7 +3,7 @@ export {};
 declare global {
   namespace NodeJS {
     interface ProcessEnv {
-      APP_ENV: "local" | undefined;
+      APP_ENV: "local" | "production" | undefined;
       BOT_TOKEN: string;
       BOT_TOKEN_DEV: string;
 
